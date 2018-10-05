@@ -10,11 +10,11 @@ class Map:
         self.height = height
         self.tiles = self.initialize_tiles()
         self.entities = []
-        self.fov_mod = fov_mod
-        self.fov = None
+        self.fov_mod = fov_mod # apply this onto fov, for different lighting scenarios
+        self.fov = None # fov can't be generated until the map is
 
     def initialize_tiles(self):
-        return [[Tile(True, None) for y in range(self.height)] for x in range(self.width)]
+        return [[Tile(True) for y in range(self.height)] for x in range(self.width)]
 
     def initialize_map(self):
         # Create two rooms for demonstration purposes
@@ -30,7 +30,6 @@ class Map:
 
         for y in range(self.height):
             for x in range(self.width):
-                print(self.tiles[x][y].opaque, self.tiles[x][y].solid)
                 tcod.map_set_properties(fov, x, y, not self.tiles[x][y].opaque, not self.tiles[x][y].solid)
         return fov
 
@@ -43,6 +42,7 @@ class Map:
             for y in range(room.y1 + 1, room.y2):
                 self.tiles[x][y].solid = False
                 self.tiles[x][y].opaque = False
+
 
     def create_h_tunnel(self, x1, x2, y):
         for x in range(min(x1, x2), max(x1, x2) + 1):
@@ -74,14 +74,12 @@ class Map:
                 for x in range(self.width):
                     visible = tcod.map_is_in_fov(self.fov, x, y)
                     wall = self.tiles[x][y].opaque
-
                     if visible:
                         if wall:
                             tcod.console_set_char_background(con, x, y, COLORS.get('light_wall'), tcod.BKGND_SET)
                         else:
                             tcod.console_set_char_background(con, x, y, COLORS.get('light_ground'), tcod.BKGND_SET)
                         self.tiles[x][y].explored = True
-
                     elif self.tiles[x][y].explored:
                         if wall:
                             tcod.console_set_char_background(con, x, y, COLORS.get('dark_wall'), tcod.BKGND_SET)

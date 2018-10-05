@@ -7,8 +7,8 @@ from entity.entity import Entity
 
 def main():
     FULLSCREEN = False
-    SCREEN_WIDTH = 80  # characters wide
-    SCREEN_HEIGHT = 50  # characters tall
+    SCREEN_WIDTH = 96  # characters wide
+    SCREEN_HEIGHT = 54  # characters tall
 
     FOV_ALGO = 0  # default FOV algorithm
     FOV_LIGHT_WALLS = True
@@ -22,6 +22,7 @@ def main():
     title = 'Python 3 + Libtcod tutorial'
     main_con = tcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
     tcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, title, FULLSCREEN)
+    # tcod.console_print_frame(main_con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, True, tcod.BKGND_NONE, 'MAP')
 
     map = Map(SCREEN_WIDTH, SCREEN_HEIGHT)
     xo, yo = map.generate_map(SCREEN_WIDTH, SCREEN_HEIGHT, 6, 10, 30)
@@ -33,7 +34,7 @@ def main():
     while not tcod.console_is_window_closed():
         tcod.console_set_default_foreground(main_con, tcod.white)
 
-        map.draw(main_con)
+        map.draw(main_con, True)
         tcod.console_blit(main_con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0)
         tcod.console_flush()
         map.clear(main_con)
