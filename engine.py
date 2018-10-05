@@ -10,6 +10,10 @@ def main():
     SCREEN_WIDTH = 80  # characters wide
     SCREEN_HEIGHT = 50  # characters tall
 
+    FOV_ALGO = 0  # default FOV algorithm
+    FOV_LIGHT_WALLS = True
+    LIGHT_RADIUS = 10
+
     # Setup Font
     font_filename = 'res/arial12x12.png'
     tcod.console_set_custom_font(font_filename, tcod.FONT_TYPE_GREYSCALE | tcod.FONT_LAYOUT_TCOD)
@@ -23,6 +27,7 @@ def main():
     xo, yo = map.generate_map(SCREEN_WIDTH, SCREEN_HEIGHT, 6, 10, 30)
     player = Entity(xo, yo, '@', tcod.white)
     map.add(player)
+    map.recompute_fov(main_con, player.x, player.y, 10)
 
 
     while not tcod.console_is_window_closed():
@@ -32,7 +37,6 @@ def main():
         tcod.console_blit(main_con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0)
         tcod.console_flush()
         map.clear(main_con)
-        # map.clear
 
         userInput = handle_keys()
 
@@ -40,6 +44,7 @@ def main():
             dx, dy, = userInput.get('move')
             if not map.tiles[player.x + dx][player.y + dy].solid:
                 player.move(dx, dy)
+                map.recompute_fov(main_con, player.x, player.y, 10)
 
         if userInput.get('exit'):
             return True
