@@ -2,6 +2,8 @@ import libtcodpy as tcod
 from map.tile import Tile
 from map.shapes import Rectangle
 from colors import COLORS
+from entity.entity import Entity
+from entity.components.hitpoints import Hitpoints
 
 
 class Map:
@@ -103,8 +105,13 @@ class Map:
         for entity in self.entities:
             if entity.solid and entity.x == x and entity.y == y:
                 return True
-
         return False
+
+    def entity_at(self, x, y):
+        for entity in self.entities:
+            if entity.x == x and entity.y == y:
+                return entity
+        return None
 
     def generate_map(self, map_width, map_height, min_room_size, max_room_size, max_rooms):
         rooms = []
@@ -143,6 +150,8 @@ class Map:
                 else:
                     # all rooms after the first:
                     # connect it to the previous room with a tunnel
+
+                    self.add(Entity(new_x, new_y, "k", "Kobold", tcod.red, True, Hitpoints(8)))
 
                     # center coordinates of previous room
                     (prev_x, prev_y) = rooms[num_rooms - 1].center()

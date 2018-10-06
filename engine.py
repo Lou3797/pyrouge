@@ -4,18 +4,22 @@ from input import handle_keys
 from map.map import Map
 from entity.entity import Entity
 from gamestates import Gamestates
+from entity.components.components import Components
+from entity.components.ability_scores import Ability_Scores
+from entity.components.hitpoints import Hitpoints
+from entity.components.fighter import Fighter
 
 
 def main():
     FULLSCREEN = False
     SCREEN_WIDTH = 96  # characters wide
     SCREEN_HEIGHT = 54  # characters tall
-    CAMERA_WIDTH, CAMERA_HEIGHT = 64, 36
+    CAMERA_WIDTH, CAMERA_HEIGHT = 70, 36
     CAMERA_BUFFER = 2
 
     FOV_ALGO = 0  # default FOV algorithm
     FOV_LIGHT_WALLS = True
-    LIGHT_RADIUS = 10
+    LIGHT_RADIUS = 3
 
     # Setup Font
     font_filename = 'res/arial12x12.png'
@@ -39,7 +43,8 @@ def main():
     current_map = Map(SCREEN_WIDTH, SCREEN_HEIGHT)
     xo, yo = current_map.generate_map(SCREEN_WIDTH, SCREEN_HEIGHT, 6, 10, 30)
     camera_x, camera_y = xo - (CAMERA_WIDTH // 2), yo - (CAMERA_HEIGHT // 2)
-    player = Entity(xo, yo, '@', "Player", tcod.white, True)
+
+    player = Entity(xo, yo, '@', "Player", tcod.white, True, Ability_Scores(dex=14), Hitpoints(30), Fighter())
     current_map.add(player)
     current_map.recompute_fov(map_con, player.x, player.y, 10)
 
@@ -73,8 +78,15 @@ def main():
                     camera_x += dx
                 if player.y < camera_y + (CAMERA_HEIGHT // 2) - CAMERA_BUFFER or player.y > camera_y + (CAMERA_HEIGHT // 2) + CAMERA_BUFFER:
                     camera_y += dy
-                current_map.recompute_fov(map_con, player.x, player.y, 10)
+                current_map.recompute_fov(map_con, player.x, player.y, LIGHT_RADIUS)
                 gamestate = Gamestates.OTHER_ROUND
+            else:
+                entity = current_map.entity_at(player.x + dx, player.y + dy)
+                if entity and entity.get_component(Components.HITPOINTS):
+                    print(entity.get_component(Components.HITPOINTS).cur_hp)
+
+
+        print(player.get_component(Components.HITPOINTS).cur_hp)
 
         if userInput.get('exit'):
             return True
