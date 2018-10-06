@@ -4,18 +4,25 @@ import libtcodpy as tcod
 class Entity:
     # this is a generic object: the player, a monster, an item, the stairs...
     # it's always represented by a character on screen.
-    def __init__(self, x, y, char, color, components=None):
+    def __init__(self, x, y, char, name, color, solid=False, components=None):
         self.x = x
         self.y = y
         self.char = char
         self.color = color
+        self.solid = solid
         # A dictionary of components ex. {'fighter': Fighter(10, 5, 2), 'inventory': Inventory(26)}
         self.components = components
 
-    def move(self, dx, dy):
+    def move(self, dx, dy, dest_map=None):
         # move by the given amount
+
+        if dest_map:
+            if dest_map.is_blocked(self.x + dx, self.y + dy):
+                return False
+
         self.x += dx
         self.y += dy
+        return True
 
     def draw(self, con):
         # set the color and then draw the character that represents this object at its position

@@ -94,6 +94,18 @@ class Map:
         for entity in self.entities:
             entity.clear(con)
 
+    def is_blocked(self, x, y):
+        # first test the map tile
+        if self.tiles[x][y].solid:
+            return True
+
+        # now check for any blocking objects
+        for entity in self.entities:
+            if entity.solid and entity.x == x and entity.y == y:
+                return True
+
+        return False
+
     def generate_map(self, map_width, map_height, min_room_size, max_room_size, max_rooms):
         rooms = []
         num_rooms = 0
