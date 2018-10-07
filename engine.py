@@ -3,6 +3,7 @@ import libtcodpy as tcod
 from entity.components.ability_scores import Ability_Scores
 from entity.components.components import Components
 from entity.components.fighter import Fighter
+from entity.components.fov import FOV
 from entity.components.hitpoints import Hitpoints
 from entity.entity import Entity, RenderOrder
 from gamestates import Gamestates
@@ -19,7 +20,7 @@ def main():
     CAMERA_WIDTH, CAMERA_HEIGHT = 70, 36
     CAMERA_BUFFER = 2
 
-    FOV_ALGO = 0  # default FOV algorithm
+    FOV_ALGO = 2
     FOV_LIGHT_WALLS = True
     LIGHT_RADIUS = 8
 
@@ -44,9 +45,10 @@ def main():
     xo, yo = current_map.generate_map(SCREEN_WIDTH, SCREEN_HEIGHT, 6, 10, 30)
     camera_x, camera_y = xo - (CAMERA_WIDTH // 2), yo - (CAMERA_HEIGHT // 2)
 
-    player = Entity(xo, yo, '@', "player", tcod.white, True, RenderOrder.ACTOR, Ability_Scores(dex=14), Hitpoints(30), Fighter())
+    player = Entity(xo, yo, '@', "player", tcod.white, True, RenderOrder.ACTOR, Ability_Scores(dex=14), Hitpoints(30),
+                    Fighter(), FOV(current_map.fov, LIGHT_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO))
     current_map.add(player)
-    current_map.recompute_fov(map_con, player.x, player.y, LIGHT_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO)
+    current_map.recompute_entity_fovs()
 
     msg_log = MessageLog(1, CAMERA_WIDTH - 2, SCREEN_HEIGHT - CAMERA_HEIGHT - 2)
 
@@ -59,19 +61,16 @@ def main():
         logs = []
 
         tcod.console_set_default_foreground(map_con, tcod.white)
-        current_map.draw(map_con)
+        current_map.draw(map_con, player.get_component(Components.FOV).fov)
         msg_log.draw(log_con)
-        # draw_bar(status_con, 1, 1, 20, "HP", player.get_component(Components.HITPOINTS).cur_hp,
-        #          player.get_component(Components.HITPOINTS).max_hp, tcod.dark_green, tcod.dark_red)
+
         tcod.console_blit(map_con, camera_x, camera_y, CAMERA_WIDTH, CAMERA_HEIGHT, 0, 0, 0)
         tcod.console_blit(log_con, 0, 0, CAMERA_WIDTH, SCREEN_HEIGHT - CAMERA_HEIGHT, 0, 0, CAMERA_HEIGHT)
         tcod.console_blit(status_con, 0, 0, SCREEN_WIDTH - CAMERA_WIDTH, SCREEN_HEIGHT // 2, 0, CAMERA_WIDTH, 0)
         tcod.console_blit(equip_con, 0, 0, SCREEN_WIDTH - CAMERA_WIDTH, SCREEN_HEIGHT // 2, 0, CAMERA_WIDTH, SCREEN_HEIGHT // 2)
         tcod.console_flush()
-        # tcod.console_clear(map_con)
         current_map.clear(map_con)
         tcod.console_clear(log_con)
-        # tcod.console_clear(status_con)
 
         userInput = handle_keys()
 
@@ -83,7 +82,7 @@ def main():
                     camera_x += dx
                 if player.y < camera_y + (CAMERA_HEIGHT // 2) - CAMERA_BUFFER or player.y > camera_y + (CAMERA_HEIGHT // 2) + CAMERA_BUFFER:
                     camera_y += dy
-                current_map.recompute_fov(map_con, player.x, player.y, LIGHT_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO)
+                player.get_component(Components.FOV).recompute_fov()
                 gamestate = Gamestates.OTHER_ROUND
                 current_map.sort_entities_by_render_order()
 

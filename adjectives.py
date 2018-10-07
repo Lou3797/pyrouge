@@ -1,7 +1,0 @@
-ADJECTIVE_ITEMS = {
-
-}
-
-ADJECTIVE_MONSTERS = {
-
-}
