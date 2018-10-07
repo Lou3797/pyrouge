@@ -8,6 +8,7 @@ class Components(Enum):
     ITEM = 3
     AI = 4
     FIGHTER = 5
+    CORPSE = 6
 
 
 class Component:

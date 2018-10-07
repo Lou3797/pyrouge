@@ -8,3 +8,5 @@ class Gamestates(Enum):
     PLAYER_DEAD = 3
     INVENTORY = 4
     SHOP = 5
+    LOOTING = 6
+    TARGETING = 7

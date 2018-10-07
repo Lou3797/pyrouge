@@ -2,8 +2,9 @@ import libtcodpy as tcod
 from map.tile import Tile
 from map.shapes import Rectangle
 from colors import COLORS
-from entity.entity import Entity
+from entity.entity import Entity, RenderOrder
 from entity.components.hitpoints import Hitpoints
+from entity.components.corpse import Corpse
 
 
 class Map:
@@ -18,7 +19,7 @@ class Map:
     def initialize_tiles(self):
         return [[Tile(True) for y in range(self.height)] for x in range(self.width)]
 
-    def initialize_map(self):
+    def initialize_basic_map(self):
         # Create two rooms for demonstration purposes
         room1 = Rectangle(20, 15, 10, 15)
         room2 = Rectangle(35, 15, 10, 15)
@@ -92,6 +93,9 @@ class Map:
             if tcod.map_is_in_fov(self.fov, entity.x, entity.y):
                 entity.draw(con)
 
+    def sort_entities_by_render_order(self):
+        self.entities = sorted(self.entities, key=lambda x: x.render_order.value)
+
     def clear(self, con):
         for entity in self.entities:
             entity.clear(con)
@@ -151,7 +155,7 @@ class Map:
                     # all rooms after the first:
                     # connect it to the previous room with a tunnel
 
-                    self.add(Entity(new_x, new_y, "k", "Kobold", tcod.red, True, Hitpoints(8)))
+                    self.add(Entity(new_x, new_y, "k", "Kobold", tcod.red, True, RenderOrder.ACTOR, Hitpoints(8), Corpse()))
 
                     # center coordinates of previous room
                     (prev_x, prev_y) = rooms[num_rooms - 1].center()
