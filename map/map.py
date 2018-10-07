@@ -5,6 +5,7 @@ from colors import COLORS
 from entity.entity import Entity, RenderOrder
 from entity.components.hitpoints import Hitpoints
 from entity.components.corpse import Corpse
+from entity.components.ai import BasicMonster
 
 
 class Map:
@@ -45,7 +46,6 @@ class Map:
             for y in range(room.y1 + 1, room.y2):
                 self.tiles[x][y].solid = False
                 self.tiles[x][y].opaque = False
-
 
     def create_h_tunnel(self, x1, x2, y):
         for x in range(min(x1, x2), max(x1, x2) + 1):
@@ -155,7 +155,7 @@ class Map:
                     # all rooms after the first:
                     # connect it to the previous room with a tunnel
 
-                    self.add(Entity(new_x, new_y, "k", "Kobold", tcod.red, True, RenderOrder.ACTOR, Hitpoints(8), Corpse()))
+                    self.add(Entity(new_x, new_y, "k", "kobold", tcod.red, True, RenderOrder.ACTOR, Hitpoints(8), BasicMonster()))
 
                     # center coordinates of previous room
                     (prev_x, prev_y) = rooms[num_rooms - 1].center()

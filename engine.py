@@ -9,6 +9,7 @@ from gamestates import Gamestates
 from input import handle_keys
 from map.map import Map
 from ui.messages import Message, MessageLog
+from ui.bar import draw_bar
 
 
 def main():
@@ -43,7 +44,7 @@ def main():
     xo, yo = current_map.generate_map(SCREEN_WIDTH, SCREEN_HEIGHT, 6, 10, 30)
     camera_x, camera_y = xo - (CAMERA_WIDTH // 2), yo - (CAMERA_HEIGHT // 2)
 
-    player = Entity(xo, yo, '@', "Player", tcod.white, True, RenderOrder.ACTOR, Ability_Scores(dex=14), Hitpoints(30), Fighter())
+    player = Entity(xo, yo, '@', "player", tcod.white, True, RenderOrder.ACTOR, Ability_Scores(dex=14), Hitpoints(30), Fighter())
     current_map.add(player)
     current_map.recompute_fov(map_con, player.x, player.y, LIGHT_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO)
 
@@ -56,18 +57,21 @@ def main():
     ###################################################################################
     while not tcod.console_is_window_closed():
         logs = []
-        # msg_log.add_message(Message("Player is at: " + str(player.x) + ", " + str(player.y), tcod.red))
 
         tcod.console_set_default_foreground(map_con, tcod.white)
         current_map.draw(map_con)
         msg_log.draw(log_con)
+        # draw_bar(status_con, 1, 1, 20, "HP", player.get_component(Components.HITPOINTS).cur_hp,
+        #          player.get_component(Components.HITPOINTS).max_hp, tcod.dark_green, tcod.dark_red)
         tcod.console_blit(map_con, camera_x, camera_y, CAMERA_WIDTH, CAMERA_HEIGHT, 0, 0, 0)
         tcod.console_blit(log_con, 0, 0, CAMERA_WIDTH, SCREEN_HEIGHT - CAMERA_HEIGHT, 0, 0, CAMERA_HEIGHT)
         tcod.console_blit(status_con, 0, 0, SCREEN_WIDTH - CAMERA_WIDTH, SCREEN_HEIGHT // 2, 0, CAMERA_WIDTH, 0)
         tcod.console_blit(equip_con, 0, 0, SCREEN_WIDTH - CAMERA_WIDTH, SCREEN_HEIGHT // 2, 0, CAMERA_WIDTH, SCREEN_HEIGHT // 2)
         tcod.console_flush()
+        # tcod.console_clear(map_con)
         current_map.clear(map_con)
         tcod.console_clear(log_con)
+        # tcod.console_clear(status_con)
 
         userInput = handle_keys()
 

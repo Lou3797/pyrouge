@@ -15,8 +15,8 @@ class Hitpoints(Component):
     def take_damage(self, dmg, src=None):
         logs = []
         self.cur_hp -= dmg
-        logs.append(Message('{0} attacks {1} for {2} hit points!'.format(
-            src.name, self.owner.name, str(dmg)), tcod.red))
+        logs.append(Message("{0} attacks {1} for {2} HP!".format(
+            src.name.capitalize(), self.owner.name, str(dmg)), tcod.red))
         if self.cur_hp <= 0:
             self.cur_hp = 0
             if self.on_death:
@@ -24,12 +24,16 @@ class Hitpoints(Component):
             else:
                 logs.append(on_death(self.owner, src))
         return logs
-        # return Message('{0} attacks {1} for {2} hit points.'.format(src.name, self.owner.name, str(dmg)), tcod.red)
 
     def heal(self, hp):
-        self.cur_hp += hp
-        if self.cur_hp > self.max_hp:
-            self.cur_hp = self.max_hp
+        if self.is_dead():
+            return Message("{0} cannot be healed.".format(self.owner.name.capitalize()))
+        else:
+            self.cur_hp += hp
+            if self.cur_hp > self.max_hp:
+                self.cur_hp = self.max_hp
+            # return Message("{0} heals {1} for {2} HP!".format())
+            return Message("{0} regains {1} HP!".format(self.owner.name.capitalize(), str(hp)))
 
     def temp_health(self, hp, max=None):
         if max:

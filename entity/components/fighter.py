@@ -10,7 +10,6 @@ class Fighter(Component):
         logs = []
         logs.extend(target.get_component(Components.HITPOINTS).take_damage(self.roll_damage(), self.owner))
         return logs
-        # return target.get_component(Components.HITPOINTS).take_damage(self.roll_damage(), self.owner)
 
     def roll_damage(self):
         return 3

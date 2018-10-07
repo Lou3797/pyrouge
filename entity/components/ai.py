@@ -10,11 +10,12 @@ class Ai:
         return
 
 
-class BasicMonster(Component, Ai):
+class BasicMonster(Component):
     def __init__(self):
-        Component.__init__(self, Components.AI)
-        Ai.__init__(self)
+        # Component.__init__(self, Components.AI)
+        # Ai.__init__(self)
+        super().__init__(Components.AI)
 
     def take_turn(self):
-        # placeholder
+        # print(self.owner.name, "took a turn")
         return

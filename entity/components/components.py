@@ -9,6 +9,7 @@ class Components(Enum):
     AI = 4
     FIGHTER = 5
     CORPSE = 6
+    FOV = 7
 
 
 class Component:
