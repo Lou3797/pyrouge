@@ -97,8 +97,7 @@ class Map:
                 num_rooms += 1
 
         for spawn in spawns:
-            # self.add(generate_monster(self, spawn[0], spawn[1], Monsters.KOBOLD))
-            break
+            self.add(generate_monster(self, spawn[0], spawn[1], Monsters.KOBOLD))
 
         return (xo, yo)
 

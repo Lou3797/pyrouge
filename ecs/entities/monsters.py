@@ -12,6 +12,7 @@ from ecs.components.char import Char
 from ecs.components.position import Position
 from ecs.entities.entity import Entity
 from ecs.entities.render_order import Render_Order
+from ecs.systems.death_functions import on_death
 
 
 class Monsters(Enum):

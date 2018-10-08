@@ -56,12 +56,6 @@ class FOV_Movement_System(System):
             src = source.get_component(Components.POSITION)
             fov = source.get_component(Components.FOV)
             trg = target.get_component(Components.POSITION)
-            # # Create a FOV map that has the dimensions of the map
-            # fov = tcod.map_new(map.width, map.height)
-            # # Scan the current map each turn and set all the walls as unwalkable
-            # for y1 in range(map.height):
-            #     for x1 in range(map.width):
-            #         tcod.map_set_properties(fov, x1, y1, not map.tiles[x1][y1].opaque, not map.tiles[x1][y1].solid)
             # Scan all the objects to see if there are objects that must be navigated around
             # Check also that the object isn't self or the target (so that the start and the end points are free)
             # The AI class handles the situation if self is next to the target so it will not use this A* function anyway
