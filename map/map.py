@@ -37,44 +37,7 @@ class Map:
         for entity in args:
             self.entities.append(entity)
 
-    # def draw(self, con, entity_fov):
-    #     if not entity_fov:
-    #         for y in range(self.height):
-    #             for x in range(self.width):
-    #                 wall = self.tiles[x][y].opaque
-    #                 if wall:
-    #                     tcod.console_set_char_background(con, x, y, COLORS.get('dark_wall'), tcod.BKGND_SET)
-    #                 else:
-    #                     tcod.console_set_char_background(con, x, y, COLORS.get('dark_ground'), tcod.BKGND_SET)
-    #
-    #     else:
-    #         for y in range(self.height):
-    #             for x in range(self.width):
-    #                 visible = tcod.map_is_in_fov(entity_fov, x, y)
-    #                 wall = self.tiles[x][y].opaque
-    #                 if visible:
-    #                     if wall:
-    #                         tcod.console_set_char_background(con, x, y, COLORS.get('light_wall'), tcod.BKGND_SET)
-    #                     else:
-    #                         tcod.console_set_char_background(con, x, y, COLORS.get('light_ground'), tcod.BKGND_SET)
-    #                     self.tiles[x][y].explored = True
-    #                 elif self.tiles[x][y].explored:
-    #                     if wall:
-    #                         tcod.console_set_char_background(con, x, y, COLORS.get('dark_wall'), tcod.BKGND_SET)
-    #                     else:
-    #                         tcod.console_set_char_background(con, x, y, COLORS.get('dark_ground'), tcod.BKGND_SET)
-    #
-    #     for entity in self.entities:
-    #         if tcod.map_is_in_fov(entity_fov, entity.x, entity.y):
-    #             entity.draw(con)
-
-    def sort_entities_by_render_order(self):
-        self.entities = sorted(self.entities, key=lambda x: x.render_order.value)
-
-    # def clear(self, con):
-    #     for entity in self.entities:
-    #         entity.clear(con)
-
+    # Remove?
     def is_blocked_at(self, x, y):
         # first test the map tile
         if self.tiles[x][y].solid:
@@ -86,6 +49,7 @@ class Map:
                 return True
         return False
 
+    # Remove?
     def entities_at(self, x, y):
         entities = []
         for entity in self.entities:
@@ -162,9 +126,3 @@ class Map:
         for y in range(self.height):
             for x in range(self.width):
                 self.tiles[x][y].explored = False
-
-    def recompute_entity_fovs(self):
-        for entity in self.entities:
-            if entity.get_component(Components.FOV):
-                entity.get_component(Components.FOV).recompute_fov()
-        return None

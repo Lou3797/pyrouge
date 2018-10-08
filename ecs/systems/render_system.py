@@ -45,3 +45,7 @@ class Render_System(System):
                 pos = entity.get_component(Components.POSITION)
                 x, y = pos.x, pos.y
                 tcod.console_put_char(self.console, x, y, ' ', tcod.BKGND_NONE)
+
+    def sort_entities_by_render_order(self, map):
+        # This will fail on any entities with no CHAR component
+        map.entities = sorted(map.entities, key=lambda x: x.get_component(Components.CHAR).render_order.value)

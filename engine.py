@@ -8,6 +8,7 @@ from ecs.components.movable import Movable
 from ecs.entities.monsters import generate_monster, Monsters
 from ecs.entities.entity import Entity
 from ecs.systems.render_system import Render_System
+from ecs.systems.fov_system import FOV_System
 from gamestates import Gamestates
 from input import handle_keys
 from map.map import Map
@@ -44,11 +45,12 @@ def main():
 
     player = generate_monster(current_map, xo, yo, Monsters.PLAYER)
     current_map.add(player)
-    # current_map.recompute_entity_fovs()
 
     msg_log = MessageLog(1, CAMERA_WIDTH - 2, SCREEN_HEIGHT - CAMERA_HEIGHT - 2)
 
     map_renderer = Render_System(map_con)
+    fov_renderer = FOV_System()
+    fov_renderer.recompute_single_entity_fov(player)
 
     gamestate = Gamestates.PLAYER_ROUND
 
@@ -59,18 +61,14 @@ def main():
         logs = []
 
         tcod.console_set_default_foreground(map_con, tcod.white)
-        # current_map.draw(map_con, player.get_component(Components.FOV).fov)
         map_renderer.render_map(current_map, player.get_component(Components.FOV).fov)
         msg_log.draw(log_con)
-
         tcod.console_blit(map_con, camera_x, camera_y, CAMERA_WIDTH, CAMERA_HEIGHT, 0, 0, 0)
         tcod.console_blit(log_con, 0, 0, CAMERA_WIDTH, SCREEN_HEIGHT - CAMERA_HEIGHT, 0, 0, CAMERA_HEIGHT)
         tcod.console_blit(status_con, 0, 0, SCREEN_WIDTH - CAMERA_WIDTH, SCREEN_HEIGHT // 2, 0, CAMERA_WIDTH, 0)
         tcod.console_blit(equip_con, 0, 0, SCREEN_WIDTH - CAMERA_WIDTH, SCREEN_HEIGHT // 2, 0, CAMERA_WIDTH, SCREEN_HEIGHT // 2)
         tcod.console_flush()
-        # current_map.clear(map_con)
         map_renderer.clear_entities(current_map)
-
         tcod.console_clear(log_con)
 
         userInput = handle_keys()
