@@ -1,5 +1,5 @@
 import libtcodpy as tcod
-from entity.components.components import *
+from ecs.components.component import *
 
 
 class BasicMonster(Component):
@@ -13,5 +13,3 @@ class BasicMonster(Component):
                     self.owner.get_component(Components.MOVABLE).move_astar(target, map)
             else:
                 self.owner.get_component(Components.MOVABLE).move(tcod.random_get_int(0, -1, 1), tcod.random_get_int(0, -1, 1), map)
-
-

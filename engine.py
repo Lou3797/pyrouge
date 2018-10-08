@@ -1,12 +1,13 @@
-#!/usr/bin/env python
 import libtcodpy as tcod
-from entity.components.ability_scores import Ability_Scores
-from entity.components.components import Components
-from entity.components.fighter import Fighter
-from entity.components.fov import FOV
-from entity.components.hitpoints import Hitpoints
-from entity.components.movable import Movable
-from entity.entity import Entity, RenderOrder
+from ecs.components.ability_scores import Ability_Scores
+from ecs.components.component import Components
+from ecs.components.fighter import Fighter
+from ecs.components.fov import FOV
+from ecs.components.hitpoints import Hitpoints
+from ecs.components.movable import Movable
+from ecs.entities.monsters import generate_monster, Monsters
+from ecs.entities.entity import Entity
+from ecs.systems.render_system import Render_System
 from gamestates import Gamestates
 from input import handle_keys
 from map.map import Map
@@ -19,10 +20,6 @@ def main():
     SCREEN_HEIGHT = 54  # characters tall
     CAMERA_WIDTH, CAMERA_HEIGHT = 70, 36
     CAMERA_BUFFER = 2
-
-    FOV_ALGO = 2
-    FOV_LIGHT_WALLS = True
-    LIGHT_RADIUS = 8
 
     # Setup Font
     font_filename = 'res/arial12x12.png'
@@ -45,12 +42,13 @@ def main():
     xo, yo = current_map.generate_map(SCREEN_WIDTH, SCREEN_HEIGHT, 6, 10, 30)
     camera_x, camera_y = xo - (CAMERA_WIDTH // 2), yo - (CAMERA_HEIGHT // 2)
 
-    player = Entity(xo, yo, '@', "player", tcod.white, True, RenderOrder.ACTOR, Ability_Scores(dex=14), Hitpoints(30),
-                    Fighter(), Movable(), FOV(current_map, LIGHT_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO))
+    player = generate_monster(current_map, xo, yo, Monsters.PLAYER)
     current_map.add(player)
-    current_map.recompute_entity_fovs()
+    # current_map.recompute_entity_fovs()
 
     msg_log = MessageLog(1, CAMERA_WIDTH - 2, SCREEN_HEIGHT - CAMERA_HEIGHT - 2)
+
+    map_renderer = Render_System(map_con)
 
     gamestate = Gamestates.PLAYER_ROUND
 
@@ -61,7 +59,8 @@ def main():
         logs = []
 
         tcod.console_set_default_foreground(map_con, tcod.white)
-        current_map.draw(map_con, player.get_component(Components.FOV).fov)
+        # current_map.draw(map_con, player.get_component(Components.FOV).fov)
+        map_renderer.render_map(current_map, player.get_component(Components.FOV).fov)
         msg_log.draw(log_con)
 
         tcod.console_blit(map_con, camera_x, camera_y, CAMERA_WIDTH, CAMERA_HEIGHT, 0, 0, 0)
@@ -69,49 +68,51 @@ def main():
         tcod.console_blit(status_con, 0, 0, SCREEN_WIDTH - CAMERA_WIDTH, SCREEN_HEIGHT // 2, 0, CAMERA_WIDTH, 0)
         tcod.console_blit(equip_con, 0, 0, SCREEN_WIDTH - CAMERA_WIDTH, SCREEN_HEIGHT // 2, 0, CAMERA_WIDTH, SCREEN_HEIGHT // 2)
         tcod.console_flush()
-        current_map.clear(map_con)
+        # current_map.clear(map_con)
+        map_renderer.clear_entities(current_map)
+
         tcod.console_clear(log_con)
 
         userInput = handle_keys()
 
         if gamestate is Gamestates.PLAYER_ROUND and userInput.get('move'):
             dx, dy, = userInput.get('move')
-            if player.get_component(Components.MOVABLE):
-                moved = player.get_component(Components.MOVABLE).move(dx, dy, current_map)
-                if moved:
-                    if player.x < camera_x + (CAMERA_WIDTH // 2) - CAMERA_BUFFER or player.x > camera_x + (
-                        CAMERA_WIDTH // 2) + CAMERA_BUFFER:
-                        camera_x += dx
-                    if player.y < camera_y + (CAMERA_HEIGHT // 2) - CAMERA_BUFFER or player.y > camera_y + (
-                        CAMERA_HEIGHT // 2) + CAMERA_BUFFER:
-                        camera_y += dy
-                    # player.get_component(Components.FOV).recompute_fov()
-                    current_map.recompute_entity_fovs()
-                    gamestate = Gamestates.OTHER_ROUND
-                    # THIS IS NOT EFFICIENT AND SHOULD CHANGE. ONLY A MOVING ENTITY NEEDS TO UPDATE ITS FOV
-                    current_map.sort_entities_by_render_order()
-
-                else:
-                    entities = current_map.entities_at(player.x + dx, player.y + dy)
-                    for entity in entities:
-                        if entity.get_component(Components.HITPOINTS):
-                            if not entity.get_component(Components.HITPOINTS).is_dead():
-                                logs.extend(player.get_component(Components.FIGHTER).attack(entity))
-                                gamestate = Gamestates.OTHER_ROUND
-                                current_map.sort_entities_by_render_order()
+            # if player.get_component(Components.MOVABLE):
+            #     moved = player.get_component(Components.MOVABLE).move(dx, dy, current_map)
+            #     if moved:
+            #         if player.x < camera_x + (CAMERA_WIDTH // 2) - CAMERA_BUFFER or player.x > camera_x + (
+            #             CAMERA_WIDTH // 2) + CAMERA_BUFFER:
+            #             camera_x += dx
+            #         if player.y < camera_y + (CAMERA_HEIGHT // 2) - CAMERA_BUFFER or player.y > camera_y + (
+            #             CAMERA_HEIGHT // 2) + CAMERA_BUFFER:
+            #             camera_y += dy
+            #         # player.get_component(Components.FOV).recompute_fov()
+            #         current_map.recompute_entity_fovs()
+            #         gamestate = Gamestates.OTHER_ROUND
+            #         # THIS IS NOT EFFICIENT AND SHOULD CHANGE. ONLY A MOVING ENTITY NEEDS TO UPDATE ITS FOV
+            #         current_map.sort_entities_by_render_order()
+            #
+            #     else:
+            #         entities = current_map.entities_at(player.x + dx, player.y + dy)
+            #         for entity in entities:
+            #             if entity.get_component(Components.HITPOINTS):
+            #                 if not entity.get_component(Components.HITPOINTS).is_dead():
+            #                     logs.extend(player.get_component(Components.FIGHTER).attack(entity))
+            #                     gamestate = Gamestates.OTHER_ROUND
+            #                     current_map.sort_entities_by_render_order()
 
         if userInput.get('wait'):
             gamestate = Gamestates.OTHER_ROUND
 
-        if player.get_component(Components.HITPOINTS).is_dead():
-            gamestate = Gamestates.PLAYER_DEAD
+        # if player.get_component(Components.HITPOINTS).is_dead():
+        #     gamestate = Gamestates.PLAYER_DEAD
 
         if gamestate is Gamestates.OTHER_ROUND:
-            for entity in current_map.entities:
-                if entity.get_component(Components.AI):
-                    entity.get_component(Components.AI).take_turn(player, current_map)
+            # for entity in current_map.entities:
+            #     if entity.get_component(Components.AI):
+            #         entity.get_component(Components.AI).take_turn(player, current_map)
+            # current_map.sort_entities_by_render_order()
             gamestate = Gamestates.PLAYER_ROUND
-            current_map.sort_entities_by_render_order()
 
         if gamestate is Gamestates.PLAYER_DEAD:
             logs.append(Message("You have died!", tcod.red))

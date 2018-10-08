@@ -1,12 +1,14 @@
-from entity.components.components import Components
+import libtcodpy as tcod
+from ecs.components.component import Components
+from ecs.entities.render_order import Render_Order
 from ui.messages import Message
-from entity.entity import RenderOrder
 
 
-def on_death(entity, char='%', src=None):
+def on_death(entity, char='%', color=tcod.red, src=None):
     entity.char = char
+    entity.color = color
     entity.solid = False
-    entity.render_order = RenderOrder.CORPSE
+    entity.render_order = Render_Order.CORPSE
     entity.remove_component(Components.FIGHTER)
     entity.remove_component(Components.AI)
     entity.remove_component(Components.FOV)

@@ -1,4 +1,4 @@
-from entity.components.components import *
+from ecs.components.component import *
 
 
 class Ability_Scores(Component):

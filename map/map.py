@@ -1,9 +1,9 @@
 import libtcodpy as tcod
-from map.tile import Tile
-from map.shapes import Rectangle
 from colors import COLORS
-from entity.components.components import Components
-from entity.monsters import Monsters, generate_monster
+from ecs.components.component import Components
+from ecs.entities.monsters import Monsters, generate_monster
+from map.shapes import Rectangle
+from map.tile import Tile
 
 
 class Map:
@@ -37,43 +37,43 @@ class Map:
         for entity in args:
             self.entities.append(entity)
 
-    def draw(self, con, entity_fov):
-        if not entity_fov:
-            for y in range(self.height):
-                for x in range(self.width):
-                    wall = self.tiles[x][y].opaque
-                    if wall:
-                        tcod.console_set_char_background(con, x, y, COLORS.get('dark_wall'), tcod.BKGND_SET)
-                    else:
-                        tcod.console_set_char_background(con, x, y, COLORS.get('dark_ground'), tcod.BKGND_SET)
-
-        else:
-            for y in range(self.height):
-                for x in range(self.width):
-                    visible = tcod.map_is_in_fov(entity_fov, x, y)
-                    wall = self.tiles[x][y].opaque
-                    if visible:
-                        if wall:
-                            tcod.console_set_char_background(con, x, y, COLORS.get('light_wall'), tcod.BKGND_SET)
-                        else:
-                            tcod.console_set_char_background(con, x, y, COLORS.get('light_ground'), tcod.BKGND_SET)
-                        self.tiles[x][y].explored = True
-                    elif self.tiles[x][y].explored:
-                        if wall:
-                            tcod.console_set_char_background(con, x, y, COLORS.get('dark_wall'), tcod.BKGND_SET)
-                        else:
-                            tcod.console_set_char_background(con, x, y, COLORS.get('dark_ground'), tcod.BKGND_SET)
-
-        for entity in self.entities:
-            if tcod.map_is_in_fov(entity_fov, entity.x, entity.y):
-                entity.draw(con)
+    # def draw(self, con, entity_fov):
+    #     if not entity_fov:
+    #         for y in range(self.height):
+    #             for x in range(self.width):
+    #                 wall = self.tiles[x][y].opaque
+    #                 if wall:
+    #                     tcod.console_set_char_background(con, x, y, COLORS.get('dark_wall'), tcod.BKGND_SET)
+    #                 else:
+    #                     tcod.console_set_char_background(con, x, y, COLORS.get('dark_ground'), tcod.BKGND_SET)
+    #
+    #     else:
+    #         for y in range(self.height):
+    #             for x in range(self.width):
+    #                 visible = tcod.map_is_in_fov(entity_fov, x, y)
+    #                 wall = self.tiles[x][y].opaque
+    #                 if visible:
+    #                     if wall:
+    #                         tcod.console_set_char_background(con, x, y, COLORS.get('light_wall'), tcod.BKGND_SET)
+    #                     else:
+    #                         tcod.console_set_char_background(con, x, y, COLORS.get('light_ground'), tcod.BKGND_SET)
+    #                     self.tiles[x][y].explored = True
+    #                 elif self.tiles[x][y].explored:
+    #                     if wall:
+    #                         tcod.console_set_char_background(con, x, y, COLORS.get('dark_wall'), tcod.BKGND_SET)
+    #                     else:
+    #                         tcod.console_set_char_background(con, x, y, COLORS.get('dark_ground'), tcod.BKGND_SET)
+    #
+    #     for entity in self.entities:
+    #         if tcod.map_is_in_fov(entity_fov, entity.x, entity.y):
+    #             entity.draw(con)
 
     def sort_entities_by_render_order(self):
         self.entities = sorted(self.entities, key=lambda x: x.render_order.value)
 
-    def clear(self, con):
-        for entity in self.entities:
-            entity.clear(con)
+    # def clear(self, con):
+    #     for entity in self.entities:
+    #         entity.clear(con)
 
     def is_blocked_at(self, x, y):
         # first test the map tile
@@ -153,7 +153,8 @@ class Map:
                 num_rooms += 1
 
         for spawn in spawns:
-            self.add(generate_monster(self, spawn[0], spawn[1], Monsters.KOBOLD))
+            # self.add(generate_monster(self, spawn[0], spawn[1], Monsters.KOBOLD))
+            break
 
         return (xo, yo)
 

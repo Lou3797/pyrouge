@@ -12,6 +12,8 @@ class Components(Enum):
     FOV = 7
     MOVABLE = 8
     READS_INPUT = 9
+    POSITION = 10
+    CHAR = 11
 
 
 class Component:
