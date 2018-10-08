@@ -7,6 +7,7 @@ from ecs.components.hitpoints import Hitpoints
 from ecs.components.movable import Movable
 from ecs.entities.monsters import generate_monster, Monsters
 from ecs.entities.entity import Entity
+from ecs.systems.camera_system import Camera_System
 from ecs.systems.render_system import Render_System
 from ecs.systems.fov_system import FOV_System
 from ecs.systems.movement_system import Basic_Movement_System, FOV_Movement_System
@@ -42,7 +43,8 @@ def main():
 
     current_map = Map(SCREEN_WIDTH, SCREEN_HEIGHT)
     xo, yo = current_map.generate_map(SCREEN_WIDTH, SCREEN_HEIGHT, 6, 10, 30)
-    camera_x, camera_y = xo - (CAMERA_WIDTH // 2), yo - (CAMERA_HEIGHT // 2)
+    # camera_x, camera_y = xo - (CAMERA_WIDTH // 2), yo - (CAMERA_HEIGHT // 2)
+    camera = Camera_System(xo, yo, CAMERA_WIDTH, CAMERA_HEIGHT, CAMERA_BUFFER)
 
     player = generate_monster(current_map, xo, yo, Monsters.PLAYER)
     current_map.add(player)
@@ -65,7 +67,7 @@ def main():
         tcod.console_set_default_foreground(map_con, tcod.white)
         map_renderer.render_map(current_map, player.get_component(Components.FOV).fov)
         msg_log.draw(log_con)
-        tcod.console_blit(map_con, camera_x, camera_y, CAMERA_WIDTH, CAMERA_HEIGHT, 0, 0, 0)
+        tcod.console_blit(map_con, camera.x, camera.y, CAMERA_WIDTH, CAMERA_HEIGHT, 0, 0, 0)
         tcod.console_blit(log_con, 0, 0, CAMERA_WIDTH, SCREEN_HEIGHT - CAMERA_HEIGHT, 0, 0, CAMERA_HEIGHT)
         tcod.console_blit(status_con, 0, 0, SCREEN_WIDTH - CAMERA_WIDTH, SCREEN_HEIGHT // 2, 0, CAMERA_WIDTH, 0)
         tcod.console_blit(equip_con, 0, 0, SCREEN_WIDTH - CAMERA_WIDTH, SCREEN_HEIGHT // 2, 0, CAMERA_WIDTH, SCREEN_HEIGHT // 2)
@@ -79,12 +81,7 @@ def main():
             dx, dy, = userInput.get('move')
             moved = basic_movement.move(player, dx, dy, current_map)
             if moved:
-                # if player.x < camera_x + (CAMERA_WIDTH // 2) - CAMERA_BUFFER or player.x > camera_x + (
-                #             CAMERA_WIDTH // 2) + CAMERA_BUFFER:
-                #             camera_x += dx
-                # if player.y < camera_y + (CAMERA_HEIGHT // 2) - CAMERA_BUFFER or player.y > camera_y + (
-                #             CAMERA_HEIGHT // 2) + CAMERA_BUFFER:
-                #             camera_y += dy
+                camera.follow(player, dx, dy)
                 fov_renderer.recompute_single_entity_fov(player)
 
                 # if player.get_component(Components.MOVABLE):
