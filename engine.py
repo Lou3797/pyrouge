@@ -83,6 +83,7 @@ def main():
                 entities = basic_movement.collision_system.entities_at_projection(current_map, player, dx, dy)
                 for entity in entities:
                     logs.extend(combat_system.attack(player, entity))
+
                     gamestate = Gamestates.OTHER_ROUND
 
             #     else:

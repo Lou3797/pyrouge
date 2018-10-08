@@ -37,5 +37,5 @@ def generate_monster(map, x, y, id):
                                  Components.FOV: FOV(map, 10, algorithm=2),
                                  Components.ABILITY_SCORES: Ability_Scores(),
                                  Components.FIGHTER: Fighter(),
-                                 Components.HITPOINTS: Hitpoints(10),
+                                 Components.HITPOINTS: Hitpoints(8),
                                  Components.AI: BasicMonster()})
