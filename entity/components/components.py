@@ -10,6 +10,8 @@ class Components(Enum):
     FIGHTER = 5
     CORPSE = 6
     FOV = 7
+    MOVABLE = 8
+    READS_INPUT = 9
 
 
 class Component:

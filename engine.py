@@ -5,12 +5,12 @@ from entity.components.components import Components
 from entity.components.fighter import Fighter
 from entity.components.fov import FOV
 from entity.components.hitpoints import Hitpoints
+from entity.components.movable import Movable
 from entity.entity import Entity, RenderOrder
 from gamestates import Gamestates
 from input import handle_keys
 from map.map import Map
 from ui.messages import Message, MessageLog
-from ui.bar import draw_bar
 
 
 def main():
@@ -46,7 +46,7 @@ def main():
     camera_x, camera_y = xo - (CAMERA_WIDTH // 2), yo - (CAMERA_HEIGHT // 2)
 
     player = Entity(xo, yo, '@', "player", tcod.white, True, RenderOrder.ACTOR, Ability_Scores(dex=14), Hitpoints(30),
-                    Fighter(), FOV(current_map, LIGHT_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO))
+                    Fighter(), Movable(), FOV(current_map, LIGHT_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO))
     current_map.add(player)
     current_map.recompute_entity_fovs()
 
@@ -76,26 +76,29 @@ def main():
 
         if gamestate is Gamestates.PLAYER_ROUND and userInput.get('move'):
             dx, dy, = userInput.get('move')
-            moved = player.move(dx, dy, current_map)
-            if moved:
-                if player.x < camera_x + (CAMERA_WIDTH // 2) - CAMERA_BUFFER or player.x > camera_x + (CAMERA_WIDTH // 2) + CAMERA_BUFFER:
-                    camera_x += dx
-                if player.y < camera_y + (CAMERA_HEIGHT // 2) - CAMERA_BUFFER or player.y > camera_y + (CAMERA_HEIGHT // 2) + CAMERA_BUFFER:
-                    camera_y += dy
-                # player.get_component(Components.FOV).recompute_fov()
-                current_map.recompute_entity_fovs()
-                gamestate = Gamestates.OTHER_ROUND
-                # THIS IS NOT EFFICIENT AND SHOULD CHANGE. ONLY A MOVING ENTITY NEEDS TO UPDATE ITS FOV
-                current_map.sort_entities_by_render_order()
+            if player.get_component(Components.MOVABLE):
+                moved = player.get_component(Components.MOVABLE).move(dx, dy, current_map)
+                if moved:
+                    if player.x < camera_x + (CAMERA_WIDTH // 2) - CAMERA_BUFFER or player.x > camera_x + (
+                        CAMERA_WIDTH // 2) + CAMERA_BUFFER:
+                        camera_x += dx
+                    if player.y < camera_y + (CAMERA_HEIGHT // 2) - CAMERA_BUFFER or player.y > camera_y + (
+                        CAMERA_HEIGHT // 2) + CAMERA_BUFFER:
+                        camera_y += dy
+                    # player.get_component(Components.FOV).recompute_fov()
+                    current_map.recompute_entity_fovs()
+                    gamestate = Gamestates.OTHER_ROUND
+                    # THIS IS NOT EFFICIENT AND SHOULD CHANGE. ONLY A MOVING ENTITY NEEDS TO UPDATE ITS FOV
+                    current_map.sort_entities_by_render_order()
 
-            else:
-                entities = current_map.entities_at(player.x + dx, player.y + dy)
-                for entity in entities:
-                    if entity.get_component(Components.HITPOINTS):
-                        if not entity.get_component(Components.HITPOINTS).is_dead():
-                            logs.extend(player.get_component(Components.FIGHTER).attack(entity))
-                            gamestate = Gamestates.OTHER_ROUND
-                            current_map.sort_entities_by_render_order()
+                else:
+                    entities = current_map.entities_at(player.x + dx, player.y + dy)
+                    for entity in entities:
+                        if entity.get_component(Components.HITPOINTS):
+                            if not entity.get_component(Components.HITPOINTS).is_dead():
+                                logs.extend(player.get_component(Components.FIGHTER).attack(entity))
+                                gamestate = Gamestates.OTHER_ROUND
+                                current_map.sort_entities_by_render_order()
 
         if userInput.get('wait'):
             gamestate = Gamestates.OTHER_ROUND

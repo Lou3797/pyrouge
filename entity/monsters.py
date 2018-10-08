@@ -8,6 +8,7 @@ from entity.components.fov import FOV
 from entity.components.hitpoints import Hitpoints
 from entity.components.inventory import Inventroy
 from entity.components.item import Item
+from entity.components.movable import Movable
 
 class Monsters(Enum):
     KOBOLD = 0
@@ -16,4 +17,4 @@ class Monsters(Enum):
 def generate_monster(map, x, y, id):
      if id is Monsters.KOBOLD:
          return Entity(x, y, "k", "kobold", tcod.dark_orange, True,
-                       RenderOrder.ACTOR, Hitpoints(8), BasicMonster(), FOV(map, 10))
+                       RenderOrder.ACTOR, Hitpoints(8), BasicMonster(), FOV(map, 10), Movable())
