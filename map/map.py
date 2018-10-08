@@ -37,26 +37,6 @@ class Map:
         for entity in args:
             self.entities.append(entity)
 
-    # Remove?
-    def is_blocked_at(self, x, y):
-        # first test the map tile
-        if self.tiles[x][y].solid:
-            return True
-
-        # now check for any blocking objects
-        for entity in self.entities:
-            if entity.solid and entity.x == x and entity.y == y:
-                return True
-        return False
-
-    # Remove?
-    def entities_at(self, x, y):
-        entities = []
-        for entity in self.entities:
-            if entity.x == x and entity.y == y:
-                entities.append(entity)
-        return entities
-
     def generate_map(self, map_width, map_height, min_room_size, max_room_size, max_rooms):
         rooms = []
         spawns = []

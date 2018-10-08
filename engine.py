@@ -9,6 +9,7 @@ from ecs.entities.monsters import generate_monster, Monsters
 from ecs.entities.entity import Entity
 from ecs.systems.render_system import Render_System
 from ecs.systems.fov_system import FOV_System
+from ecs.systems.movement_system import Basic_Movement_System, FOV_Movement_System
 from gamestates import Gamestates
 from input import handle_keys
 from map.map import Map
@@ -51,6 +52,7 @@ def main():
     map_renderer = Render_System(map_con)
     fov_renderer = FOV_System()
     fov_renderer.recompute_single_entity_fov(player)
+    basic_movement = Basic_Movement_System()
 
     gamestate = Gamestates.PLAYER_ROUND
 
@@ -75,7 +77,17 @@ def main():
 
         if gamestate is Gamestates.PLAYER_ROUND and userInput.get('move'):
             dx, dy, = userInput.get('move')
-            # if player.get_component(Components.MOVABLE):
+            moved = basic_movement.move(player, dx, dy, current_map)
+            if moved:
+                # if player.x < camera_x + (CAMERA_WIDTH // 2) - CAMERA_BUFFER or player.x > camera_x + (
+                #             CAMERA_WIDTH // 2) + CAMERA_BUFFER:
+                #             camera_x += dx
+                # if player.y < camera_y + (CAMERA_HEIGHT // 2) - CAMERA_BUFFER or player.y > camera_y + (
+                #             CAMERA_HEIGHT // 2) + CAMERA_BUFFER:
+                #             camera_y += dy
+                fov_renderer.recompute_single_entity_fov(player)
+
+                # if player.get_component(Components.MOVABLE):
             #     moved = player.get_component(Components.MOVABLE).move(dx, dy, current_map)
             #     if moved:
             #         if player.x < camera_x + (CAMERA_WIDTH // 2) - CAMERA_BUFFER or player.x > camera_x + (
