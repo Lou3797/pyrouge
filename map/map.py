@@ -2,10 +2,8 @@ import libtcodpy as tcod
 from map.tile import Tile
 from map.shapes import Rectangle
 from colors import COLORS
-from entity.entity import Entity, RenderOrder
-from entity.components.hitpoints import Hitpoints
-from entity.components.ai import BasicMonster
 from entity.components.components import Components
+from entity.monsters import Monsters, generate_monster
 
 
 class Map:
@@ -14,18 +12,9 @@ class Map:
         self.height = height
         self.tiles = self.initialize_tiles()
         self.entities = []
-        self.fov = None # fov can't be generated until the map is
 
     def initialize_tiles(self):
         return [[Tile(True) for y in range(self.height)] for x in range(self.width)]
-
-    def initialize_fov(self):
-        fov = tcod.map_new(self.width, self.height)
-
-        for y in range(self.height):
-            for x in range(self.width):
-                tcod.map_set_properties(fov, x, y, not self.tiles[x][y].opaque, not self.tiles[x][y].solid)
-        return fov
 
     def create_room(self, room):
         # go through the tiles in the rectangle and make them passable
@@ -86,7 +75,7 @@ class Map:
         for entity in self.entities:
             entity.clear(con)
 
-    def is_blocked(self, x, y):
+    def is_blocked_at(self, x, y):
         # first test the map tile
         if self.tiles[x][y].solid:
             return True
@@ -97,14 +86,16 @@ class Map:
                 return True
         return False
 
-    def entity_at(self, x, y):
+    def entities_at(self, x, y):
+        entities = []
         for entity in self.entities:
             if entity.x == x and entity.y == y:
-                return entity
-        return None
+                entities.append(entity)
+        return entities
 
     def generate_map(self, map_width, map_height, min_room_size, max_room_size, max_rooms):
         rooms = []
+        spawns = []
         num_rooms = 0
         xo = 0
         yo = 0
@@ -141,7 +132,7 @@ class Map:
                     # all rooms after the first:
                     # connect it to the previous room with a tunnel
 
-                    self.add(Entity(new_x, new_y, "k", "kobold", tcod.red, True, RenderOrder.ACTOR, Hitpoints(8), BasicMonster()))
+                    spawns.append((new_x, new_y))
 
                     # center coordinates of previous room
                     (prev_x, prev_y) = rooms[num_rooms - 1].center()
@@ -161,11 +152,10 @@ class Map:
                 rooms.append(new_room)
                 num_rooms += 1
 
-        self.set_fov()
-        return (xo, yo)
+        for spawn in spawns:
+            self.add(generate_monster(self, spawn[0], spawn[1], Monsters.KOBOLD))
 
-    def set_fov(self):
-        self.fov = self.initialize_fov()
+        return (xo, yo)
 
     def reset_exploration(self):
         for y in range(self.height):
@@ -177,4 +167,3 @@ class Map:
             if entity.get_component(Components.FOV):
                 entity.get_component(Components.FOV).recompute_fov()
         return None
-

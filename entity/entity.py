@@ -30,7 +30,7 @@ class Entity:
         # move by the given amount
 
         if dest_map:
-            if dest_map.is_blocked(self.x + dx, self.y + dy):
+            if dest_map.is_blocked_at(self.x + dx, self.y + dy):
                 return False
 
         self.x += dx
@@ -50,11 +50,10 @@ class Entity:
         dx = int(round(dx / distance))
         dy = int(round(dy / distance))
 
-        if not (map.is_blocked(self.x + dx, self.y + dy) or
-                    map.entity_at(self.x + dx, self.y + dy)):
+        if not map.is_blocked_at(self.x + dx, self.y + dy):
             self.move(dx, dy)
 
-    def move_astar(self, target, entities, map):
+    def move_astar(self, target, map):
         # Create a FOV map that has the dimensions of the map
         fov = tcod.map_new(map.width, map.height)
 
@@ -66,8 +65,8 @@ class Entity:
         # Scan all the objects to see if there are objects that must be navigated around
         # Check also that the object isn't self or the target (so that the start and the end points are free)
         # The AI class handles the situation if self is next to the target so it will not use this A* function anyway
-        for entity in entities:
-            if entity.blocks and entity != self and entity != target:
+        for entity in map.entities:
+            if entity.solid and entity != self and entity != target:
                 # Set the tile as a wall so it must be navigated around
                 tcod.map_set_properties(fov, entity.x, entity.y, True, False)
 

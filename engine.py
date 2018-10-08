@@ -46,7 +46,7 @@ def main():
     camera_x, camera_y = xo - (CAMERA_WIDTH // 2), yo - (CAMERA_HEIGHT // 2)
 
     player = Entity(xo, yo, '@', "player", tcod.white, True, RenderOrder.ACTOR, Ability_Scores(dex=14), Hitpoints(30),
-                    Fighter(), FOV(current_map.fov, LIGHT_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO))
+                    Fighter(), FOV(current_map, LIGHT_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO))
     current_map.add(player)
     current_map.recompute_entity_fovs()
 
@@ -82,16 +82,23 @@ def main():
                     camera_x += dx
                 if player.y < camera_y + (CAMERA_HEIGHT // 2) - CAMERA_BUFFER or player.y > camera_y + (CAMERA_HEIGHT // 2) + CAMERA_BUFFER:
                     camera_y += dy
-                player.get_component(Components.FOV).recompute_fov()
+                # player.get_component(Components.FOV).recompute_fov()
+                current_map.recompute_entity_fovs()
                 gamestate = Gamestates.OTHER_ROUND
+                # THIS IS NOT EFFICIENT AND SHOULD CHANGE. ONLY A MOVING ENTITY NEEDS TO UPDATE ITS FOV
                 current_map.sort_entities_by_render_order()
 
             else:
-                entity = current_map.entity_at(player.x + dx, player.y + dy)
-                if entity and entity.get_component(Components.HITPOINTS):
-                    logs.extend(player.get_component(Components.FIGHTER).attack(entity))
-                    gamestate = Gamestates.OTHER_ROUND
-                    current_map.sort_entities_by_render_order()
+                entities = current_map.entities_at(player.x + dx, player.y + dy)
+                for entity in entities:
+                    if entity.get_component(Components.HITPOINTS):
+                        if not entity.get_component(Components.HITPOINTS).is_dead():
+                            logs.extend(player.get_component(Components.FIGHTER).attack(entity))
+                            gamestate = Gamestates.OTHER_ROUND
+                            current_map.sort_entities_by_render_order()
+
+        if userInput.get('wait'):
+            gamestate = Gamestates.OTHER_ROUND
 
         if player.get_component(Components.HITPOINTS).is_dead():
             gamestate = Gamestates.PLAYER_DEAD
@@ -99,7 +106,7 @@ def main():
         if gamestate is Gamestates.OTHER_ROUND:
             for entity in current_map.entities:
                 if entity.get_component(Components.AI):
-                    entity.get_component(Components.AI).take_turn()
+                    entity.get_component(Components.AI).take_turn(player, current_map)
             gamestate = Gamestates.PLAYER_ROUND
             current_map.sort_entities_by_render_order()
 

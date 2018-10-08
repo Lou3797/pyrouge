@@ -22,7 +22,7 @@ class Hitpoints(Component):
             if self.on_death:
                 logs.append(self.on_death(self.owner, src))
             else:
-                logs.append(on_death(self.owner, src))
+                logs.append(on_death(self.owner, src=src))
         return logs
 
     def heal(self, hp):

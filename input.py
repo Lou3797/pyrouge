@@ -31,5 +31,7 @@ def handle_keys():
         return {'move': (-1, 1)}
     elif key.vk == tcod.KEY_KP3:
         return {'move': (1, 1)}
+    elif key.vk == tcod.KEY_KP5:
+        return {'wait': True}
 
     return {}
