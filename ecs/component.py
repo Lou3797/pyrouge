@@ -1,6 +1,7 @@
 from enum import Enum
 
-
+"""
+"""
 class Components(Enum):
     ABILITY_SCORES = 0
     HITPOINTS = 1
@@ -13,10 +14,12 @@ class Components(Enum):
     MOVABLE = 8
     READS_INPUT = 9
     POSITION = 10
-    CHAR = 11
+    ICON = 11
 
-
+"""
+The base component class
+"""
 class Component:
     def __init__(self, id):
         self.id = id
-        self.owner = None
+        # self.owner = None

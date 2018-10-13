@@ -1,5 +1,5 @@
-from ecs.systems.system import System
-from ecs.components.component import Components
+from ecs.component import Components
+from ecs.system import System
 
 
 class Camera_System(System):

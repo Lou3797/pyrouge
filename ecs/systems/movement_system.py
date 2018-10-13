@@ -1,11 +1,11 @@
-import libtcodpy as tcod
 import math
-from ecs.systems.system import System
-from ecs.components.component import Components
-from ecs.systems.collision_system import Collision_System
+
+import libtcodpy as tcod
+from ecs.component import Components
+from ecs.system import System
 
 
-class Basic_Movement_System(System):
+class BasicMovementSystem(System):
     def __init__(self):
         super().__init__(Components.POSITION, Components.MOVABLE)
         self.collision_system = Collision_System()
@@ -49,7 +49,7 @@ class Basic_Movement_System(System):
 class FOV_Movement_System(System):
     def __init__(self):
         super().__init__(Components.POSITION, Components.MOVABLE, Components.FOV)
-        self.basic_movement = Basic_Movement_System()
+        self.basic_movement = BasicMovementSystem()
 
     def move_astar(self, source, target, map):
         if self.has_required_components(source) and self.has_required_components(target):
@@ -86,3 +86,41 @@ class FOV_Movement_System(System):
                 self.basic_movement.move_towards(trg.x, trg.y, map)
                 # Delete the path to free memory
                 tcod.path_delete(my_path)
+
+
+class Collision_System(System):
+    def __init__(self):
+        super().__init__(Components.POSITION)
+
+    def is_blocked_at_entity_projection(self, map, entity, dx, dy):
+        if self.has_required_components(entity):
+            pos = entity.get_component(Components.POSITION)
+            return self.is_blocked_at(map, pos.x + dx, pos.y + dy)
+        return False
+
+    def is_blocked_at(self, map, x, y):
+        # first test the map tile
+        if map.tiles[x][y].solid:
+            return True
+        # now check for any blocking objects
+        for entity in map.entities:
+            if self.has_required_components(entity):
+                pos = entity.get_component(Components.POSITION)
+                if pos.solid and pos.x == x and pos.y == y:
+                    return True
+        return False
+
+    def entities_at_projection(self, map, entity, dx, dy):
+        if self.has_required_components(entity):
+            pos = entity.get_component(Components.POSITION)
+            return self.entities_at(map, pos.x + dx, pos.y + dy)
+        return []
+
+    def entities_at(self, map, x, y):
+        entities = []
+        for entity in map.entities:
+            if self.has_required_components(entity):
+                pos = entity.get_component(Components.POSITION)
+                if pos.x == x and pos.y == y:
+                    entities.append(entity)
+        return entities

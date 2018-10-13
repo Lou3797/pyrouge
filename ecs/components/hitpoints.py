@@ -1,5 +1,5 @@
-from ecs.components.component import *
-from ecs.systems.death_functions import on_death
+from ecs.component import *
+from ecs.entities.death_functions import on_death
 
 
 class Hitpoints(Component):

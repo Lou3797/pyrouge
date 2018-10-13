@@ -1,6 +1,4 @@
 import libtcodpy as tcod
-from colors import COLORS
-from ecs.components.component import Components
 from ecs.entities.monsters import Monsters, generate_monster
 from map.shapes import Rectangle
 from map.tile import Tile

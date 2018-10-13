@@ -1,4 +1,4 @@
-from ecs.components.component import *
+from ecs.component import *
 
 
 class Position(Component):

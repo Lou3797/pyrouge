@@ -11,7 +11,7 @@ class Rectangle:
         return (center_x, center_y)
 
     def intersect(self, other):
-        # returns true if this rectangle intersects with another one
+        # returns true if this rectangle intersects with another shape
         return (self.x1 <= other.x2 and self.x2 >= other.x1 and
                 self.y1 <= other.y2 and self.y2 >= other.y1)
 

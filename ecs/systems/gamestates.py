@@ -10,3 +10,4 @@ class Gamestates(Enum):
     SHOP = 5
     LOOTING = 6
     TARGETING = 7
+

@@ -1,0 +1,72 @@
+Entity-Component-System Basic
+Game Controller
+-Contains all the Entities
+-Contains all the Systems
+
+Entities
+-Contain their Components
+
+Components
+-Wrap relevant data
+
+Systems
+-Contain functionality for sets of Components
+
+```
+okay thinking out loud time
+component design is a very good design pattern for a rougelike
+since the components of an entity literally define the set of commands you can perform on something
+which is like, the entire point of a rougelike
+but having systems is potentially a big waste
+there really isnt anything that has to be updating every frame
+and even then, the only thing that would be updating every frame would be like, ambient lighting
+so honestly, my original systemless design definitely wasnt bad
+it just couldve been decoupled a bit better
+having the check for if an entity has the required components isolated inside its own file/class was nice
+so i need a game controller with all my systems, and the systems will just wrap all my functionality code
+(i probably dont need to worry about changing what systems can act, they can all exist all the time for my purposes)
+and then i need to get a command from the player/ai
+and feed the relevant arguments for that command into the appropriate system
+for the player this could return a "you cannot do that"
+but ideally for the AI that would never happen
+since i would setup when it does which commands
+so there
+i dont think that leaves me with any need for shit like Builders or Observers or Factories
+i think
+observers could pop up if i really need to automate some events that occur under certain conditions
+but i dont want to worry about that
+thanks for being a notepad
+now you cant say i dont do the same to you
+okay yeah a basic listener i could implement would be for health
+if the player health ever reaches 0, enter a GAMEOVER state
+rather than checking for that every round
+```
+
+
+
+
+The game is launched
+
+GameController creates all the Systems.
+-Since Systems can't change during gameplay, we don't need a dynamic System handler or fancy injections.
+
+GameController creates the player Entity and adds it to the list.
+-All new Entities are created through the GC
+-When a new Entity is created, all the relevant Observing Systems check if they should add the Entity as a Subject
+-Whenever a Component is added or removed, the Systems check if they should change their Observer status on that Entity
+
+On PLAYER_TURN, the GameController has the input System go through all controllable Entities and takes a command for them one-by-one based on some turn order
+-The input System takes the key input, and translates it into a command ie KEY_RIGHT -> {Commands.MOVE: (1, 0)}
+-This command is returned to the GC and spit passed into a command handler
+-The command handler takes the command, and the entity that
+
+The player Entity listens for inputs, so on the player turn, view cycles to the player and they take a turn
+
+
+When all controllable Entities take a turn, it is the enemy turn
+
+All Entities with an AI Component (but not a controllable Component) take their turn
+-The AI System decides what to do based on its complexity
+-The AI System
+
+It is now the player turn again.

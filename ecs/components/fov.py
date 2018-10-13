@@ -1,5 +1,5 @@
 import libtcodpy as tcod
-from ecs.components.component import *
+from ecs.component import *
 
 
 class FOV(Component):

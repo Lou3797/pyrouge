@@ -1,7 +1,7 @@
 import libtcodpy as tcod
-from ecs.systems.system import System
-from ecs.components.component import Components
-from ui.messages import Message
+from ecs.component import Components
+from ecs.system import System
+from ui.message import Message
 
 
 class Combat_System(System):
@@ -12,7 +12,8 @@ class Combat_System(System):
     def attack(self, attacker, target):
         logs = []
         if self.has_required_components(attacker) and self.health_system.has_required_components(target):
-            logs.extend(self.health_system.take_damage(attacker, target, self.roll_damage(attacker)))
+            if not self.health_system.is_dead(target):
+                logs.extend(self.health_system.take_damage(attacker, target, self.roll_damage(attacker)))
         return logs
 
     def roll_damage(self, attacker):
@@ -44,26 +45,30 @@ class Health_System(System):
                     logs.append(hp.on_death(target, src=attacker))
         return logs
 
-    # def heal(self, hp):
-    #     if self.is_dead():
-    #         return Message("{0} cannot be healed.".format(self.owner.name.capitalize()))
-    #     else:
-    #         self.cur_hp += hp
-    #         if self.cur_hp > self.max_hp:
-    #             self.cur_hp = self.max_hp
-    #         # return Message("{0} heals {1} for {2} HP!".format())
-    #         return Message("{0} regains {1} HP!".format(self.owner.name.capitalize(), str(hp)))
-    #
-    # def temp_health(self, hp, max=None):
-    #     if max:
-    #         if self.temp_hp >= max:
-    #             return
-    #         else:
-    #             self.temp_hp += hp
-    #             if self.temp_hp >= max:
-    #                 self.temp_hp = max
-    #     else:
-    #         self.temp_hp += hp
-    #
-    # def is_dead(self):
-    #     return self.cur_hp <= 0
+    def heal(self, entity, hp):
+        if self.has_required_components(Components.HITPOINTS):
+            health = entity.get_component(Components.HITPOINTS)
+            if self.is_dead(entity):
+                return Message("{0} cannot be healed.".format(entity.name.capitalize()))
+            else:
+                health.cur_hp += hp
+                if health.cur_hp > health.max_hp:
+                    health.cur_hp = health.max_hp
+                return Message("{0} regains {1} HP!".format(entity.name.capitalize(), str(hp)))
+
+    def temp_health(self, entity, hp, max=None):
+        if self.has_required_components(Components.HITPOINTS):
+            health = entity.get_component(Components.HITPOINTS)
+            if max:
+                if health.temp_hp >= max:
+                    return
+                else:
+                    health.temp_hp += hp
+                    if health.temp_hp >= max:
+                        health.temp_hp = max
+            else:
+                health.temp_hp += hp
+
+    def is_dead(self, entity):
+        if self.has_required_components(entity):
+            return entity.get_component(Components.HITPOINTS).cur_hp <= 0

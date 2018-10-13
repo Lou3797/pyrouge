@@ -1,15 +1,30 @@
-import libtcodpy as tcod
-from ecs.components.component import *
+from enum import Enum
+
+from ecs.component import *
 
 
-class BasicMonster(Component):
+class AI_Types(Enum):
+    RANDOM = 0
+    CHASE_TARGET = 1
+
+
+class AI(Component):
     def __init__(self):
         super().__init__(Components.AI)
 
-    # def take_turn(self, target, map):
-    #     if self.owner.get_component(Components.FOV):
-    #         if self.owner.get_component(Components.FOV).can_see(target) and self.owner.get_component(Components.MOVABLE):
-    #             if self.owner.get_component(Components.MOVABLE).distance_to(target) >= 2:
-    #                 self.owner.get_component(Components.MOVABLE).move_astar(target, map)
-    #         else:
-    #             self.owner.get_component(Components.MOVABLE).move(tcod.random_get_int(0, -1, 1), tcod.random_get_int(0, -1, 1), map)
+
+class Specific_AI(AI):
+    def __init__(self, ai_type):
+        super().__init__()
+        self.ai_type = ai_type
+
+
+class Random_AI(Specific_AI):
+    def __init__(self):
+        super().__init__(AI_Types.RANDOM)
+
+
+class Chase_Target_AI(Specific_AI):
+    def __init__(self, target):
+        super().__init__(AI_Types.CHASE_TARGET)
+        self.target = target
