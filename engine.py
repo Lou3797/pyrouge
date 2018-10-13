@@ -1,4 +1,5 @@
 import libtcodpy as tcod
+from ecs.systems.command_handler import Commands
 from ecs.systems.game_controller import GameController
 
 
@@ -8,7 +9,14 @@ def main():
     # Main Game Loop
     ###################################################################################
     while not tcod.console_is_window_closed():
-        gc.update()
+        setting = gc.update()
+
+        if setting:
+            if setting.get(Commands.EXIT):
+                return True
+            if setting.get(Commands.FULLSCREEN):
+                tcod.console_set_fullscreen(setting.get(Commands.FULLSCREEN))
+
         # input = p1_input.handle_input()
         #
         # if gamestate is Gamestates.PLAYER_ROUND and input.get(Commands.MOVE):

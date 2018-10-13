@@ -2,7 +2,7 @@ import libtcodpy as tcod
 from ecs.component import Components
 from ecs.components.ai import AI_Types
 from ecs.system import System, ObserverSystem
-from ecs.systems.input_handler import Commands
+from ecs.systems.command_handler import Commands
 
 
 class Base_AI_System(System):

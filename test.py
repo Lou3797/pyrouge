@@ -1,3 +1,5 @@
+import libtcodpy as tcod
+
 from ecs.entity import Entity
 from ecs.component import Components, Component
 from ecs.system import System, ObserverSystem
