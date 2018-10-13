@@ -19,4 +19,7 @@ class InputHandler(ObserverSystem):
         elif key.vk == tcod.KEY_RIGHT or key.vk == tcod.KEY_KP6:
             return {Commands.MOVE: (entity, 1, 0)}
 
+        elif key.vk == tcod.KEY_ESCAPE:
+            return {Commands.EXIT: (True)}
+
         return {}

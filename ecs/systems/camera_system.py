@@ -2,7 +2,7 @@ from ecs.component import Components
 from ecs.system import System
 
 
-class Camera_System(System):
+class CameraSystem(System):
     def __init__(self, x, y, width, height, buffer=0):
         super().__init__(Components.POSITION)
         self.x = 0

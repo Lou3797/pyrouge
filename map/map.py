@@ -12,8 +12,7 @@ class Map:
         self.entities = []
 
     def initialize_tiles(self):
-        # TODO Change back to True
-        return [[Tile(False) for y in range(self.height)] for x in range(self.width)]
+        return [[Tile(True) for y in range(self.height)] for x in range(self.width)]
 
     def create_room(self, room):
         # go through the tiles in the rectangle and make them passable
@@ -36,7 +35,7 @@ class Map:
         for entity in args:
             self.entities.append(entity)
 
-    def generate_map(self, map_width, map_height, min_room_size, max_room_size, max_rooms):
+    def generate_map(self, min_room_size, max_room_size, max_rooms):
         rooms = []
         spawns = []
         num_rooms = 0
@@ -48,8 +47,8 @@ class Map:
             w = tcod.random_get_int(0, min_room_size, max_room_size)
             h = tcod.random_get_int(0, min_room_size, max_room_size)
             # random position without going out of the boundaries of the map
-            x = tcod.random_get_int(0, 0, map_width - w - 1)
-            y = tcod.random_get_int(0, 0, map_height - h - 1)
+            x = tcod.random_get_int(0, 0, self.width - w - 1)
+            y = tcod.random_get_int(0, 0, self.height - h - 1)
 
             # "Rect" class makes rectangles easier to work with
             new_room = Rectangle(x, y, w, h)
@@ -96,9 +95,9 @@ class Map:
                 num_rooms += 1
 
         for spawn in spawns:
-            # self.add(generate_monster(self, spawn[0], spawn[1], Monsters.KOBOLD))
-            break
+            self.add(generate_monster(self, spawn[0], spawn[1], Monsters.KOBOLD))
 
+        self.add(generate_monster(self, xo, yo, Monsters.PLAYER))
         return (xo, yo)
 
     def reset_exploration(self):
