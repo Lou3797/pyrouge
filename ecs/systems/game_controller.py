@@ -46,7 +46,8 @@ class SampleInputHandler:
 
 
 class SampleCommandHandler:
-    def __init__(self):
+    def __init__(self, game_controller):
+        self.gc = game_controller
         pass
 
     def get_command(self, dict):
@@ -54,10 +55,9 @@ class SampleCommandHandler:
             entity = k
             if v.get(Commands.MOVE):
                 dx, dy = v.get(Commands.MOVE)
-                temp = BasicMovementSystem()
+                # temp = BasicMovementSystem()
                 # print("GOT:", entity, dx, dy)
-                temp.move(entity, dx, dy)
-
+                self.gc.movement.move(entity, dx, dy)
 
 
 class SampleAI(ObserverSystem):
@@ -77,7 +77,6 @@ class GameController:
         self.invoker = Invoker()
         self.gamestate = Gamestates.PLAYER_ROUND
         self.io = SampleInputHandler()
-        self.cmd = SampleCommandHandler()
         self.window = GameWindow()
         self.render = RenderSystem(self.window.map_con)
         self.entities = []
@@ -96,6 +95,7 @@ class GameController:
         self.ai = SampleAI()
         self.ai.attach_multiple(self.entities)
         self.movement = BasicMovementSystem()
+        self.cmd = SampleCommandHandler(self)
 
     def update(self):
         self.render.start()

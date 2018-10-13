@@ -20,14 +20,16 @@ class Entity:
         self.components[component_id] = component
 
     def remove_component(self, component_id):
-        return self.components.pop(component_id, None)
+        component =  self.components.pop(component_id, None)
+        self.update()
+        return component
 
     def attach(self, observer):
         if observer not in self.observers:
             self.observers.append(observer)
 
     def detach(self, observer):
-        print("Can't detach observers from entities yet")
+        self.observers.remove(observer)
 
     def update(self):
         for observer in self.observers:
