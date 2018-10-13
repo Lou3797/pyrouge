@@ -1,18 +1,19 @@
 from enum import Enum
-
 import libtcodpy as tcod
-from cmd.command import Commands
-from cmd.invoker import Invoker
+from map.map import Map
 from ecs.component import Components
+from ecs.components.ai import AI
 from ecs.components.icon import Icon
+from ecs.components.movable import Movable
 from ecs.components.position import Position
+from ecs.components.reads_input import ReadsInput
 from ecs.entity import Entity
-from ecs.system import ObserverSystem
+from ecs.systems.ai_system import RandomAI
+from ecs.systems.command_handler import CommandHandler
+from ecs.systems.input_handler import InputHandler
+from ecs.systems.movement_system import BasicMovementSystem
 from ecs.systems.render_system import RenderSystem
 from ui.game_window import GameWindow
-from ecs.components.movable import Movable
-from ecs.components.ai import AI
-from ecs.systems.movement_system import BasicMovementSystem
 
 
 class Gamestates(Enum):
@@ -26,102 +27,63 @@ class Gamestates(Enum):
     TARGETING = 7
 
 
-class SampleInputHandler:
-    def __init__(self):
-        pass
-
-    def capture_input(self):
-        key = tcod.console_wait_for_keypress(True)
-
-        if key.vk == tcod.KEY_UP or key.vk == tcod.KEY_KP8:
-            return {Commands.MOVE: (0, -1)}
-        elif key.vk == tcod.KEY_DOWN or key.vk == tcod.KEY_KP2:
-            return {Commands.MOVE: (0, 1)}
-        elif key.vk == tcod.KEY_LEFT or key.vk == tcod.KEY_KP4:
-            return {Commands.MOVE: (-1, 0)}
-        elif key.vk == tcod.KEY_RIGHT or key.vk == tcod.KEY_KP6:
-            return {Commands.MOVE: (1, 0)}
-
-        return {}
-
-
-class SampleCommandHandler:
-    def __init__(self, game_controller):
-        self.gc = game_controller
-        pass
-
-    def get_command(self, dict):
-        for k, v in dict.items():
-            entity = k
-            if v.get(Commands.MOVE):
-                dx, dy = v.get(Commands.MOVE)
-                # temp = BasicMovementSystem()
-                # print("GOT:", entity, dx, dy)
-                self.gc.movement.move(entity, dx, dy)
-
-
-class SampleAI(ObserverSystem):
-    def __init__(self):
-        super().__init__(Components.AI)
-
-    def process(self):
-        commands = []
-        for entity in self.subjects:
-            commands.append({entity: {Commands.MOVE: (1, 0)}})
-
-        return commands
-
-
 class GameController:
     def __init__(self):
-        self.invoker = Invoker()
         self.gamestate = Gamestates.PLAYER_ROUND
-        self.io = SampleInputHandler()
+        self.map = Map(96, 54)
+        # Systems
+        self.input = InputHandler()
         self.window = GameWindow()
         self.render = RenderSystem(self.window.map_con)
-        self.entities = []
-        self.entities.append(Entity("player", {Components.POSITION: Position(0, 0),
-                                               Components.ICON: Icon('@')}))
-        self.entities.append(Entity("kobold1", {Components.POSITION: Position(3, 1),
-                                                Components.ICON: Icon('1'),
-                                                Components.AI: AI(),
-                                                Components.MOVABLE: Movable()
-                                                }))
-        self.entities.append(Entity("kobold2", {Components.POSITION: Position(5, 5),
-                                                Components.ICON: Icon('2'),
-                                                Components.AI: AI(),
-                                                Components.MOVABLE: Movable()
-                                                }))
-        self.ai = SampleAI()
-        self.ai.attach_multiple(self.entities)
+        self.ai = RandomAI()
         self.movement = BasicMovementSystem()
-        self.cmd = SampleCommandHandler(self)
+        self.cmd = CommandHandler(self)
+        self.add_test_entities()
+        self.ai.attach_multiple(self.map.entities)
+        self.input.attach_multiple(self.map.entities)
 
     def update(self):
         self.render.start()
-        self.render.render_entities(self.entities)
+        self.render.render_entities(self.map.entities)
         self.render.exit()
-        self.render.clear_entities(self.entities)
+        self.render.clear_entities(self.map.entities)
 
         if self.gamestate is Gamestates.PLAYER_ROUND:
-            tcod.console_wait_for_keypress(True)
-            self.gamestate = Gamestates.OTHER_ROUND
-            # logs.extend(gc.handle_input())
-            # ---
-            # cmd = self.cmd.get_command(self.io.capture_input())
-            # change to add controllable entity that called it
-            # cmd = self.cmd.get_command( {entity: self.io.capture_input()} )
-            # if cmd:
-            #     self.invoker.execute(cmd)
-            #     self.gamestate = Gamestates.OTHER_ROUND
-            # ---
-            #print(self.io.capture_input())
-        if self.gamestate is Gamestates.OTHER_ROUND:
-            # logs.extend(gc.execute_ai())
-            # self.invoker.execute(self.ai.process())
-            command_list = self.ai.process()
-            print("Command list", command_list)
-            for cmd in command_list:
-                self.cmd.get_command(cmd)
+            for subject in self.input.subjects:
+                valid_command = False
+                while not valid_command:
+                    valid_command = self.cmd.execute_command(self.input.capture_input(subject))
+        self.gamestate = Gamestates.OTHER_ROUND
 
+        if self.gamestate is Gamestates.OTHER_ROUND:
+            # TODO: make it so enemies must take a valid command in order to proceed
+            command_list = self.ai.process()
+            for cmd in command_list:
+                self.cmd.execute_command(cmd)
             self.gamestate = Gamestates.PLAYER_ROUND
+
+    def add_test_entities(self):
+        self.map.entities.extend([
+            Entity("player", {
+                Components.POSITION: Position(2, 2, True),
+                Components.ICON: Icon('@'),
+                Components.MOVABLE: Movable(),
+                Components.READS_INPUT: ReadsInput()
+            }),
+            Entity("kobold", {
+                Components.POSITION: Position(5, 5, True),
+                Components.ICON: Icon('k'),
+                Components.MOVABLE: Movable(),
+                Components.AI: AI()
+            }),
+            Entity("kobold", {
+                Components.POSITION: Position(6, 8, True),
+                Components.ICON: Icon('k'),
+                Components.MOVABLE: Movable(),
+                Components.AI: AI()
+            }),
+            Entity("wall", {
+                Components.POSITION: Position(3, 3, True),
+                Components.ICON: Icon('#')
+            })
+        ])

@@ -5,14 +5,15 @@ from map.tile import Tile
 
 
 class Map:
-    def __init__(self, width, height):
+    def __init__(self, width, height, dark=True):
         self.width = width
         self.height = height
         self.tiles = self.initialize_tiles()
         self.entities = []
 
     def initialize_tiles(self):
-        return [[Tile(True) for y in range(self.height)] for x in range(self.width)]
+        # TODO Change back to True
+        return [[Tile(False) for y in range(self.height)] for x in range(self.width)]
 
     def create_room(self, room):
         # go through the tiles in the rectangle and make them passable
@@ -95,7 +96,8 @@ class Map:
                 num_rooms += 1
 
         for spawn in spawns:
-            self.add(generate_monster(self, spawn[0], spawn[1], Monsters.KOBOLD))
+            # self.add(generate_monster(self, spawn[0], spawn[1], Monsters.KOBOLD))
+            break
 
         return (xo, yo)
 

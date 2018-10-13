@@ -1,4 +1,3 @@
-import libtcodpy as tcod
 from enum import Enum
 
 
@@ -11,8 +10,3 @@ class Commands(Enum):
     CLOSE = 5
     LOOK = 6
     SEARCH = 7
-
-
-class Input_Handler:
-    def __init__(self):
-        pass

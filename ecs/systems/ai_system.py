@@ -1,6 +1,8 @@
+import libtcodpy as tcod
 from ecs.component import Components
 from ecs.components.ai import AI_Types
-from ecs.system import System
+from ecs.system import System, ObserverSystem
+from ecs.systems.input_handler import Commands
 
 
 class Base_AI_System(System):
@@ -33,3 +35,15 @@ class Target_Based_AI_System(System):
 
     def take_turn(self):
         return
+
+
+class RandomAI(ObserverSystem):
+    def __init__(self):
+        super().__init__(Components.AI)
+
+    def process(self):
+        commands = []
+        for entity in self.subjects:
+            dx, dy = tcod.random_get_int(0, -1, 1), tcod.random_get_int(0, -1, 1)
+            commands.append({Commands.MOVE: (entity, dx, dy)})
+        return commands

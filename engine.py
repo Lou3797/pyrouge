@@ -37,7 +37,7 @@ def main():
 
     gc = GameController()
 
-    msg_log = MessageLog(1, CAMERA_WIDTH - 2, SCREEN_HEIGHT - CAMERA_HEIGHT - 2)
+    # msg_log = MessageLog(1, CAMERA_WIDTH - 2, SCREEN_HEIGHT - CAMERA_HEIGHT - 2)
 
     # map_renderer = Render_System(map_con)
     # fov_renderer = FOV_System()
